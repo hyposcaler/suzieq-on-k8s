@@ -1,0 +1,102 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: suzieq
+  name: suzieq
+  labels:
+    app: suzieq
+spec:
+  replicas: 1
+  strategy: 
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: suzieq
+  template:
+    metadata:
+      labels:
+        app: suzieq
+    spec:
+      volumes:
+          - name: suzieq-tls
+            secret:
+              secretName: suzieq-tls-secret
+          - name: parquet-volume
+            persistentVolumeClaim:
+              claimName: parquet-pv-claim
+          - name: config-volume
+            configMap:
+              name: suzieq-config
+          - name: inventory-volume
+            configMap:
+              name: suzieq-inventory
+      containers:
+      - name: sq-rest-server
+        image: ddutt/suzieq-demo
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "500Mi"
+            cpu: "500m"        
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: suzieq-tls
+            mountPath: "/suzieq/tls/"
+            readOnly: true
+          - name: parquet-volume
+            mountPath: "/suzieq/parquet"
+          - name: config-volume
+            mountPath: /root/.suzieq/suzieq-cfg.yml
+            subPath: suzieq-cfg.yml 
+        command: ['sq-rest-server.py']
+        
+      - name: sq-poller
+        image: ddutt/suzieq-demo
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "500Mi"
+            cpu: "500m"        
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: suzieq-tls
+            mountPath: "/suzieq/tls/"
+            readOnly: true
+          - name: parquet-volume
+            mountPath: "/suzieq/parquet"
+          - name: config-volume
+            mountPath: /root/.suzieq/suzieq-cfg.yml
+            subPath: suzieq-cfg.yml
+          - name: inventory-volume
+            mountPath: /suzieq/inventory/inventory.yml
+            subPath: inventory.yml
+        command: ['sq-poller', '-k', '-D', '/suzieq/inventory/inventory.yml']
+        # command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
+
+      - name: suzieq-gui
+        image: ddutt/suzieq-demo
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "125m"
+          limits:
+            memory: "2000Mi"
+            cpu: "250m"        
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: suzieq-tls
+            mountPath: "/suzieq/tls/"
+            readOnly: true
+          - name: parquet-volume
+            mountPath: "/suzieq/parquet"
+          - name: config-volume
+            mountPath: /root/.suzieq/suzieq-cfg.yml
+            subPath: suzieq-cfg.yml          
+        command: ['suzieq-gui']
+      # imagePullSecrets:
+      # - name: regcred
