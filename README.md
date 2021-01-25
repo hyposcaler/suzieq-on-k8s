@@ -1,12 +1,13 @@
-# suzieq on k8s
- 
-Why?
- 
-I don't know k8s well, it's just the compute hammer I have to work with in my current environment. That said, I do happen to like k8s as a hammer, and luckily suzieq seems to do a pretty good job of being a k8s nail.  
+# SuzieQ on K8s
+## Why?
+
+I recently discovered [SuzieQ](https://github.com/netenglabs/suzieq), it's a wonderful new tool that Dinesh Dutt and Justin Pietsch have been working on.  For more details on what exactly SuzieQ is see the intro [post](https://elegantnetwork.github.io/posts/Suzieq/) by Justin & Dinesh.
+
+As to why put it on k8s?  I don't know k8s well, it's just the compute hammer I have to work with in my current environment. That said, I do happen to like k8s as a hammer, and luckily suzieq seems to do a pretty good job of being a k8s nail.  
  
 This document started as a weekend project to walk thru getting suzieq on k8s in my private lab for no other reason than it seemed fun.  The more I worked with it on k8s the more I liked the idea, and the more I liked the idea of deploying in my real physical lab.
  
-The environment I have for my network management software is effectively a managed k8s environment.  It's what I have access to for "managed compute". It also has access to the management plane of my network gear.  If I want to go to the real lab or prod, I have a vested interest in being able to deploy suzieq on k8s.
+The environment I have for my network management software is a managed k8s environment.  It's what I have access to for "managed compute". It also has access to the management plane of my network gear.  This means if I want to go to the real lab or prod, I have a vested interest in being able to deploy suzieq on k8s.
  
 The idea of using a HTTP based API for accessing much of the info that suzieq collects appeals to me.  I like the idea of connecting to a suzieQ deployment versus running the pollers directly on my workstation.  Playing with that as a puzzle problem appeals to me as much as suzieQ as a product appeals to me as a network engineer.    I like the idea of the journey and the destination as it were.
  
@@ -16,7 +17,7 @@ Mostly me, this started as notes for me to reference later on how to do it, but 
  
 ## The basic target
  
-For just playing around in the lab I want to start out something that sticks as close as I can to the docker example that is in the suzieq repository.  In that example there are two containers; one for sq-poller, and another for the suzieq-cli.   I'm going to replicate the same in a k8s deployment set with replicas set to 1.
+For just playing around in the lab I want to start out with something that sticks as close as I can to the docker example that is in the suzieq repository.  In that example there are two containers; one for sq-poller, and another for the suzieq-cli.   I'm going to replicate the same in a k8s deployment set with replicas set to 1.
  
 My goal will be to run run 3 containers in a single k8s pod, one container for each of the following processes that make up suzieq.  
  
@@ -35,13 +36,8 @@ What's needed
 - To tie it all together I will use a k8s [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
  
 
-## Build the container
+The assorted yml files referenced in this post as well as the content of this post is available on [github](https://github.com/hyposcaler/suzieq-on-k8s/)
 
-I comment out these two lines 
-```yaml
-# COPY ./build/key.pem /root/.suzieq/
-# COPY ./build/cert.pem /root/.suzieq/
-```
 ## Generating the certificates
  
 I need a cert for the demo deployment, a self signed cert will do.  In production the certificate would be signed by my internal CA.  I can use openssl to generate the certificate with the following command 
@@ -299,7 +295,7 @@ You can validate the service via `kubectl -n suzieq get service`
 ```
 [dev-suzieq]$ kubectl -n suzieq get service
 NAME     TYPE           CLUSTER-IP       EXTERNAL-IP                                                                        PORT(S)                         AGE
-suzieq   LoadBalancer   192.168.72.180   internal-a783bc89b9b6b7e44bd0d9f26f52254c-1179302016.us-east-1.elb.amazonaws.com   8000:30411/TCP,8501:30344/TCP   46m
+suzieq   LoadBalancer   192.168.72.180   internal-a7839d0d9fb6bbc89b7e44b26f52254c-1179302016.us-east-1.elb.amazonaws.com   8000:30411/TCP,8501:30344/TCP   46m
 [dev-suzieq]$ 
 ```
  
@@ -405,8 +401,8 @@ spec:
             mountPath: /root/.suzieq/suzieq-cfg.yml
             subPath: suzieq-cfg.yml          
         command: ['suzieq-gui']
-      imagePullSecrets:
-      - name: regcred
+      # imagePullSecrets:
+      # - name: regcred
 ```
  
 Can deploy it with `kubectl apply -f samples/k8s/deployment.yml`
@@ -420,7 +416,7 @@ NAME                          READY   STATUS    RESTARTS   AGE
 pod/suzieq-66dc944496-vx7tj   3/3     Running   0          42h
  
 NAME             TYPE           CLUSTER-IP        EXTERNAL-IP                                                                        PORT(S)                         AGE
-service/suzieq   LoadBalancer   192.168.174.140   internal-a8084d7e34cc94216828986d30c42960-1384521387.us-east-1.elb.amazonaws.com   8000:31552/TCP,8501:31112/TCP   43h
+service/suzieq   LoadBalancer   192.168.174.140   internal-a7839d0d9fb6bbc89b7e44b26f52254c-1179302016.us-east-1.elb.amazonaws.com   8000:31552/TCP,8501:31112/TCP   43h
  
 NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/suzieq   1/1     1            1           42h
@@ -433,7 +429,7 @@ replicaset.apps/suzieq-66dc944496   1         1         1       42h
 We can test hitting the rest endpoint via the LB with curl
  
 ```
-[dev-suzieq]$ curl --insecure 'https://internal-a783bc89b9b6b7e44bd0d9f26f52254c-1179302016.us-east-1.elb.amazonaws.com:8000/api/v1/interface/show?&access_token=496157e6e869ef7f3d6ecb24a6f6d847b224ee4f'
+[dev-suzieq]$ curl --insecure 'https://internal-a7839d0d9fb6bbc89b7e44b26f52254c-1179302016.us-east-1.elb.amazonaws.com:8000/api/v1/interface/show?&access_token=496157e6e869ef7f3d6ecb24a6f6d847b224ee4f'
 [{"namespace":"eos","hostname":"lab1-fab1-pod1-leaf1","ifname":"Ethernet100","state":"up","adminState":"up","type":"ethernet","mtu":1500,"vlan":0,"master":"","ipAddressList":[],"ip6AddressList":[],"timestamp":1611108293987},{"namespace":"eos","hostname":"lab1-fab1-pod1-leaf1","ifname":"Ethernet1","state":"up","adminState":"up","type":"ethernet","mtu":1500,"vlan":0,"master":"","ipAddressList":["10.255.0.10/24"],"ip6AddressList":[],"timestamp":1611108293987}]
 [dev-suzieq]$ 
 ```
@@ -447,5 +443,7 @@ This isn't quite production ready.  The objective here was to recreate the docke
 My next steps are to figure out how to scale it out.   A single pod with a single sq-poller instance will suit for some basic exploration in the lab.  At some point there will be a need for more than one sq-poller, that also means a need to handle splitting inventory across what will likely be multiple pods.  How do I automate that, how do I manage that etc. etc.  
  
 Before that I need to get a feel for what the limits of a single simple pod are, and what the ends and outs of managing the parquet files will be.  For this discovery work this simple k8s deployment gives me a simple and easily recreatable starting point.
+
+[feedback?](mailto:feedback@hyposcaler.io)
  
 
