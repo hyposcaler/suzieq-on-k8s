@@ -1,4 +1,5 @@
 # SuzieQ on K8s
+
 ## Why?
 
 I recently discovered [SuzieQ](https://github.com/netenglabs/suzieq), it's a wonderful new tool that Dinesh Dutt and Justin Pietsch have been working on.  For more details on what exactly SuzieQ is see the intro [post](https://elegantnetwork.github.io/posts/Suzieq/) by Justin & Dinesh.
@@ -82,7 +83,7 @@ kubectl create secret tls suzieq-tls-secret \
  
 Regardless of how the cert is created, a k8s TLS secret is typically the interface for the deployment to access it.  There are a variety of methods to manage secrets securely on k8, they generally tend to have use of k8s secrets in common as the delivery method for exposing the secrets to containers.  
  
-In practice while I may not be diong exactly what I would in prod, the way I'm doing it creates a good approximation of what suzieq would see in prodution in my environment.
+In practice while I may not be doing exactly what I would in prod, the way I'm doing it creates a good approximation of what suzieq would see in prodution in my environment.
  
 Once I have created the k8s TLS secret, the key and cert files from openssl can be deleted.  
  
@@ -90,7 +91,7 @@ Once I have created the k8s TLS secret, the key and cert files from openssl can 
  
 There are two config related files that suzieQ uses
  
-The first is `suzieq-cfg.yml`. It is the main suzieq config file.  The suziew config holds pointers to the assorted paths for files it uses.  It also holds references to the the API_KEY used by the Rest server for auth.  Lastly it also has pointers to the locations of the TLS certificates. 
+The first is `suzieq-cfg.yml`. It is the main suzieq config file.  The suzieq config holds pointers to the assorted paths for files it uses.  It also holds references to the the API_KEY used by the Rest server for auth.  Lastly it also has pointers to the locations of the TLS certificates. 
  
 The following is a typical `suzieq-cfg.yml` file
  
@@ -407,9 +408,8 @@ spec:
  
 Can deploy it with `kubectl apply -f samples/k8s/deployment.yml`
  
-if everything is working correctly we should see 
- 
- 
+If everything is working correctly we should be able to use `kubectl -n suzieq get all` and see 3/3 containers running.
+
 ```
 [dev-suzieq]$ kubectl -n suzieq get all 
 NAME                          READY   STATUS    RESTARTS   AGE
@@ -445,5 +445,3 @@ My next steps are to figure out how to scale it out.   A single pod with a singl
 Before that I need to get a feel for what the limits of a single simple pod are, and what the ends and outs of managing the parquet files will be.  For this discovery work this simple k8s deployment gives me a simple and easily recreatable starting point.
 
 [feedback?](mailto:feedback@hyposcaler.io)
- 
-
