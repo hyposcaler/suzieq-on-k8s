@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sq-poller-headless
+  labels:
+    app: sq-poller
+spec:
+  clusterIP: None
+  selector:
+    app: sq-poller
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sq-poller
+  labels:
+    app: sq-poller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sq-poller
+  serviceName: sq-poller-headless
+  template:
+    metadata:
+      labels:
+        app: sq-poller
+        group: suzieq
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: group
+                operator: In
+                values:
+                  - suzieq
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: poller
+          image: netenglabs/suzieq:0.17.0
+          command: ["sq-poller", "-I", "inventory.yml"]
+          env:
+            - name: 'USER_PASSWORD'
+              valueFrom:
+                secretKeyRef:
+                  name: sq-credentials
+                  key: user-password
+            - name: 'ENABLE_PASSWORD' 
+              valueFrom:
+                secretKeyRef:
+                  name: sq-credentials
+                  key: enable-password
+            - name: 'SUZIEQ_API_KEY'
+              valueFrom:
+                secretKeyRef:
+                  name: sq-credentials
+                  key: api-key
+          volumeMounts:
+          - name: parquet
+            mountPath: /suzieq/parquet
+          - name: inventory
+            mountPath: /suzieq
+          - name: sq-conf
+            mountPath: /root/.suzieq
+      volumes:
+      - name: parquet
+        persistentVolumeClaim:
+          claimName: parquet-pvc
+      - name: inventory
+        configMap:
+            name: sq-inventory
+      - name: sq-conf
+        configMap:
+          name: sq-conf
+      - name: sq-filebeat-config
+        configMap:
+          name: sq-filebeat-config
+          items:
+            - key: filebeat.yml
+              path: filebeat.yml
