@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: sq-credentials
                   key: enable-password
+            - name: 'ARISTA_PASSWORD' 
+              valueFrom:
+                secretKeyRef:
+                  name: sq-credentials
+                  key: arista-password
             - name: 'SUZIEQ_API_KEY'
               valueFrom:
                 secretKeyRef:
