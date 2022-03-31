@@ -8,22 +8,39 @@ data:
       - name: cisco
         hosts:
           - url: ssh://192.168.0.10
-
+          
+      - name: eos
+        hosts:
+          - url: https://10.255.0.10
+          
     auths:
       - name: cisco-devices
         username: admin
         password: env:USER_PASSWORD
         enable-password: env:ENABLE_PASSWORD
 
+      - name: arista-devices
+        username: neteng
+        password: env:ARISTA_PASSWORD
+        
     devices:
-      - name: all
+      - name: ssh-devices
         ignore-known-hosts: true
+        
+      - name: devices-using-rest
+        transport: https
+        devtype: eos
 
     namespaces:
-      - name: test
+      - name: test-cisco
         source: cisco
         auth: cisco-devices
-        device: all    
+        device: ssh-devices
+
+      - name: test-arista
+        source: eos
+        auth: arista-devices
+        device: devices-using-rest 
 ---
 apiVersion: v1
 kind: ConfigMap
