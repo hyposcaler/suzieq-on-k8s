@@ -41,6 +41,13 @@ spec:
         - name: poller
           image: netenglabs/suzieq:0.17.0
           command: ["sq-poller", "-I", "inventory.yml"]
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "500Mi"
+            cpu: "500m" 
           env:
             - name: 'USER_PASSWORD'
               valueFrom:
