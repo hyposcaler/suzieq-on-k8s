@@ -1,10 +1,12 @@
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: suzieq
-  name: parquet-pv-claim
+  name: parquet-pvc 
 spec:
+# facing this bug - https://github.com/Azure/AKS/issues/223
+#  storageClassName: azurefile-csi-premium
+#  accessModes:
+#    - ReadWriteMany
   accessModes:
     - ReadWriteOnce
   resources:
