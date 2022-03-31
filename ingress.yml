@@ -7,7 +7,7 @@ spec:
   tls:
     - hosts:
         - suzieq.test.com
-      secretName: suzieq-tls
+      secretName: suzieq-tls-secret
   rules:
     - host: suzieq.test.com
       http:
