@@ -29,6 +29,12 @@ spec:
       - name: sq-gui
         image: docker pull netenglabs/suzieq:0.17.0
         command: ["suzieq-gui"]
+          requests:
+            memory: "500Mi"
+            cpu: "125m"
+          limits:
+            memory: "2000Mi"
+            cpu: "250m"
         env:
           - name: 'SUZIEQ_API_KEY'
             valueFrom:
