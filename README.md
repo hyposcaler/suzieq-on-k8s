@@ -6,7 +6,8 @@
 - use env variables where needed
 - poller configured as a statefulset
 - use ingress to expose suzieq webui and rest server
-- updated configuration files to match current suzieq requirements
+- updated configuration files to match current suzieq requirements and showing multiple namespaces
+- use official suzieq image
 
 ## Why?
 
