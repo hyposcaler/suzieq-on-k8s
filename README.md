@@ -1,4 +1,12 @@
-# SuzieQ on K8s
+# SuzieQ on k8s
+
+## This readme is obsolete, it needs to be updated ##
+
+- split gui, poller and rest into separate pods
+- use env variables where needed
+- poller configured as a statefulset
+- use ingress to expose suzieq webui and rest server
+- updated configuration files to match current suzieq requirements
 
 ## Why?
 
