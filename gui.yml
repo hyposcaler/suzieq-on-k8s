@@ -39,7 +39,7 @@ spec:
         - name: parquet
           mountPath: /suzieq/parquet
         - name: sq-conf
-          mountPath: /root/.suzieq
+          mountPath: /home/suzieq/.suzieq
       volumes:
       - name: parquet
         persistentVolumeClaim:
