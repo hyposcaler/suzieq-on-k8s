@@ -5,6 +5,9 @@ metadata:
   labels:
     app: sq-gui
 spec:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: "OnRootMismatch"
   replicas: 1
   selector:
     matchLabels:
