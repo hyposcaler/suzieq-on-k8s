@@ -27,6 +27,9 @@ spec:
         app: sq-poller
         group: suzieq
     spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -71,9 +74,9 @@ spec:
                   key: api-key
           volumeMounts:
           - name: parquet
-            mountPath: /suzieq/parquet
+            mountPath: /home/suzieq/parquet
           - name: inventory
-            mountPath: /suzieq
+            mountPath: /home/suzieq
           - name: sq-conf
             mountPath: /home/suzieq/.suzieq
       volumes:
