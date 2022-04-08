@@ -2,16 +2,18 @@
 
 ## TLDR ##
 
-
+- create a namespace
 ```
 kubectl create namespace -n suzieq
 ```
-
-Now provide your own TLS certificates of generate them as described in the sections below.
-Mount them as a secret called `suzieq-tls-secret`
-
-finally deploy everyting
-
+- provide your own certificates or generate a self signed ones
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+kubectl -n suzieq create secret tls suzieq-tls-secret \
+  --cert=cert.pem \
+  --key=key.pem
+```
+- deploy suzieq
 ```
 kubectl -n suzieq apply -f manifest/.
 kubectl -n suzieq get all
