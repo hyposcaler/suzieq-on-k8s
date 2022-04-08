@@ -4,7 +4,7 @@
 
 - create a namespace
 ```
-kubectl create namespace -n suzieq
+kubectl create namespace suzieq
 ```
 - provide your own certificates or generate a self signed ones
 ```
