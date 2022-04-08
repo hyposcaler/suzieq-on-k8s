@@ -76,9 +76,11 @@ spec:
           - name: parquet
             mountPath: /home/suzieq/parquet
           - name: inventory
-            mountPath: /home/suzieq
+            mountPath: /home/suzieq/inventory.yml
+            subPath: inventory.yml
           - name: sq-conf
-            mountPath: /home/suzieq/.suzieq
+            mountPath: /home/suzieq/.suzieq/suzieq-cfg.yml
+            subPath: suzieq-cfg.yml
       volumes:
       - name: parquet
         persistentVolumeClaim:
