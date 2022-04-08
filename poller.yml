@@ -91,9 +91,3 @@ spec:
       - name: sq-conf
         configMap:
           name: sq-conf
-      - name: sq-filebeat-config
-        configMap:
-          name: sq-filebeat-config
-          items:
-            - key: filebeat.yml
-              path: filebeat.yml
