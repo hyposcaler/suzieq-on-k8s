@@ -48,7 +48,7 @@ metadata:
   name: sq-conf
 data:
   suzieq-cfg.yml: |
-    data-directory: ./parquet
+    data-directory: /home/suzieq/parquet
     temp-directory: /tmp/
 
     rest:
