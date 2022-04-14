@@ -30,7 +30,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: sq-gui
-        image: netenglabs/suzieq:0.17.0
+        image: netenglabs/suzieq:0.17.1
         command: ["suzieq-gui"]
         resources:
           requests:
