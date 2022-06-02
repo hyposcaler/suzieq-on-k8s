@@ -19,7 +19,7 @@ spec:
               name: sq-gui-service
               port:
                 number: 80
-        - path: /rest
+        - path: /api
           pathType: Prefix
           backend:
             service:
