@@ -482,4 +482,3 @@ My next steps are to figure out how to scale it out.   A single pod with a singl
 Before that I need to get a feel for what the limits of a single simple pod are, and what the ends and outs of managing the parquet files will be.  For this discovery work this simple k8s deployment gives me a simple and easily recreatable starting point.
 
 [feedback?](mailto:feedback@hyposcaler.io)
-
