@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sq-gui-deploy
+  labels:
+    app: sq-gui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sq-gui
+  template:
+    metadata:
+      labels:
+        app: sq-gui
+        group: suzieq
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: group
+                operator: In
+                values:
+                  - suzieq
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: sq-gui
+        image: netenglabs/suzieq:0.17.1
+        command: ["suzieq-gui"]
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "125m"
+          limits:
+            memory: "2000Mi"
+            cpu: "250m"
+        env:
+          - name: 'SUZIEQ_API_KEY'
+            valueFrom:
+              secretKeyRef:
+                name: sq-credentials
+                key: api-key
+        volumeMounts:
+        - name: parquet
+          mountPath: /home/suzieq/parquet
+        - name: sq-conf
+          mountPath: /home/suzieq/.suzieq/suzieq-cfg.yml
+          subPath: suzieq-cfg.yml
+      volumes:
+      - name: parquet
+        persistentVolumeClaim:
+          claimName: parquet-pvc
+      - name: sq-conf
+        configMap:
+          name: sq-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sq-gui-service
+  labels:
+    name: sq-gui-service
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8501
+      nodePort: 30080
+  selector:
+    app: sq-gui

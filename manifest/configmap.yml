@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sq-inventory
+data:
+  inventory.yml: |
+    sources:
+      - name: cisco
+        hosts:
+          - url: ssh://192.168.0.10
+          
+      - name: eos
+        hosts:
+          - url: https://10.255.0.10
+          
+    auths:
+      - name: cisco-devices
+        username: admin
+        password: env:USER_PASSWORD
+        enable-password: env:ENABLE_PASSWORD
+
+      - name: arista-devices
+        username: neteng
+        password: env:ARISTA_PASSWORD
+        
+    devices:
+      - name: ssh-devices
+        ignore-known-hosts: true
+        
+      - name: devices-using-rest
+        transport: https
+        devtype: eos
+
+    namespaces:
+      - name: test-cisco
+        source: cisco
+        auth: cisco-devices
+        device: ssh-devices
+
+      - name: test-arista
+        source: eos
+        auth: arista-devices
+        device: devices-using-rest 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sq-conf
+data:
+  suzieq-cfg.yml: |
+    data-directory: /home/suzieq/parquet
+    temp-directory: /tmp/
+
+    rest:
+      API_KEY: env:SUZIEQ_API_KEY
+      logging-level: WARNING
+      address: 0.0.0.0
+      port: 8000
+      no-https: True
+      log-stdout: True
+
+    poller:
+      logging-level: WARNING
+      period: 60
+      connect-timeout: 15
+      log-stdout: True
+
+    coalescer:
+      period: 1h
+      archive-directory:
+      logging-level: WARNING
+      log-stdout: True
+
+    analyzer:
+      timezone: Europe/Prague

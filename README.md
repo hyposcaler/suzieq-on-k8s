@@ -1,4 +1,32 @@
-# SuzieQ on K8s
+# SuzieQ on k8s
+
+## TLDR ##
+
+- create a namespace
+```
+kubectl create namespace suzieq
+```
+- provide your own certificates or generate a self signed ones
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+kubectl -n suzieq create secret tls suzieq-tls-secret \
+  --cert=cert.pem \
+  --key=key.pem
+```
+- deploy suzieq
+```
+kubectl -n suzieq apply -f manifest/.
+kubectl -n suzieq get all
+```
+
+## This readme is obsolete, it needs to be updated ##
+
+- split gui, poller and rest into separate pods
+- use env variables where needed
+- poller configured as a statefulset
+- use ingress to expose suzieq webui and rest server
+- updated configuration files to match current suzieq requirements and showing multiple namespaces
+- use official suzieq image
 
 ## Why?
 
@@ -23,7 +51,7 @@ For just playing around in the lab I want to start out with something that stick
 My goal will be to run run 3 containers in a single k8s pod, one container for each of the following processes that make up suzieq.  
  
 1. `sq-poller`
-2. `sq-rest-server.py`
+2. `sq-rest-server`
 3. `suzieq-gui`
 
 For simplicity I will use the same docker container as the docker demo
@@ -38,6 +66,15 @@ What's needed
  
 
 The assorted yml files referenced in this post as well as the content of this post is available on [github](https://github.com/hyposcaler/suzieq-on-k8s/)
+
+## Create and use a namespace ##
+
+The first step in a prod k8s environment is to make sure of namespaces.
+In this example i will create a dedicated namespace for suzieq called `suzieq`
+
+`kubectl create namespace suzieq`
+
+all the `kubectl` commands will reference this namespace
 
 ## Generating the certificates
  
@@ -76,7 +113,7 @@ Once I have the certs I'll store them as secrets on the k8s server.  For the lab
  
  
 ```
-kubectl create secret tls suzieq-tls-secret \
+kubectl -n suzieq create secret tls suzieq-tls-secret \
   --cert=cert.pem \
   --key=key.pem
 ```
@@ -162,7 +199,7 @@ data:
     rest_keyfile: /suzieq/tls/tls.key
 ```
  
-then use kubectl to create the two configmaps on the k8s cluster by running `kubectl create -f samples/k8s/configmap.yml` from the root of the repo
+then use kubectl to create the two configmaps on the k8s cluster by running `kubectl -n suzieq create -f samples/k8s/configmap.yml` from the root of the repo
  
 once created kubectl can be used to to verify they exist:
  

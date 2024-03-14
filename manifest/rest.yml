@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sq-rest-deploy
+  labels:
+    app: sq-rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sq-rest
+  template:
+    metadata:
+      labels:
+        app: sq-rest
+        group: suzieq
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"  
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: group
+                operator: In
+                values:
+                  - suzieq
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: sq-rest
+        image: netenglabs/suzieq:0.17.1
+        command: ["sq-rest-server"]
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "500Mi"
+            cpu: "500m" 
+        env:
+          - name: 'SUZIEQ_API_KEY'
+            valueFrom:
+              secretKeyRef:
+                name: sq-credentials
+                key: api-key
+        volumeMounts:
+        - name: parquet
+          mountPath: /home/suzieq/parquet
+        - name: sq-conf
+          mountPath: /home/suzieq/.suzieq/suzieq-cfg.yml
+          subPath: suzieq-cfg.yml
+      volumes:
+      - name: parquet
+        persistentVolumeClaim:
+          claimName: parquet-pvc
+      - name: sq-conf
+        configMap:
+          name: sq-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sq-rest-service
+  labels:
+    name: sq-rest-service
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30081
+  selector:
+    app: sq-rest

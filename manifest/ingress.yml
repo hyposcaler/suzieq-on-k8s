@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: suzieq-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - suzieq.test.com
+      secretName: suzieq-tls-secret
+  rules:
+    - host: suzieq.test.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: sq-gui-service
+              port:
+                number: 80
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: sq-rest-service
+              port:
+                number: 80
